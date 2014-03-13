@@ -18,6 +18,7 @@ About
 ------
 This utility was written to "scratch my own itch" of me constantly forgetting my saved passwords. There are couple of third party tools available that can decrypt the password, but I wasn't overly joyed at the concept of handing over my password to an unkonwn tool downloaded from the internet. So I decided to write my own.
 
-You can download a ready made binary from "Releases" section in GitHub. But you are welcome to compile the source yourself if you don't trust binary files. 
+You can download a ready made binary [here](https://github.com/anoopengineer/winscppasswd/releases/download/1.0/winscppasswd.exe) or from "Releases" section in GitHub. But you are welcome to compile the source yourself if you don't trust binary files. 
 
 This is written in Go lang. Head over to http://golang.org/ to download the compiler.
+
