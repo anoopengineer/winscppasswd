@@ -5,6 +5,10 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+	"github.com/go-ini/ini"
+	"strings"
+	"os/user"
+	"log"
 )
 
 const (
@@ -14,17 +18,59 @@ const (
 
 func main() {
 	args := os.Args[1:]
-	if len(args) != 3 {
-		fmt.Println("WinSCP stored password finder")
-		fmt.Println("Open regedit and navigate to [HKEY_CURRENT_USER\\Software\\Martin Prikryl\\WinSCP 2\\Sessions] to get the hostname, username and encrypted password\n")
+	if len(args) != 3 || len(args) != 2 {
+		fmt.Println("WinSCP stored password finder\n")
+		fmt.Println("Registry:")
+		fmt.Println("  Open regedit and navigate to [HKEY_CURRENT_USER\\Software\\Martin Prikryl\\WinSCP 2\\Sessions] to get the hostname, username and encrypted password\n")
 		if runtime.GOOS == "windows" {
-			fmt.Println("Usage winscppasswd.exe <host> <username> <encrypted_password>")
+			fmt.Println("  Usage winscppasswd.exe <host> <username> <encrypted_password>")
 		} else {
-			fmt.Printf("Usage ./winscppasswd <host> <username> <encrypted_password>")
+			fmt.Println("  Usage ./winscppasswd <host> <username> <encrypted_password>")
 		}
+		fmt.Println("\n\nWinSCP.ini:")
+		if runtime.GOOS == "windows" {
+			fmt.Println("  Usage winscppasswd.exe ini [<filepath>]")
+		} else {
+			fmt.Println("  Usage ./winscppasswd ini [<filepath>]")
+		}
+		fmt.Printf("  Default value <filepath>: %s\n", defaultWinSCPIniFilePath());
 		return
 	}
-	fmt.Println(decrypt(args[0], args[1], args[2]))
+	if args[0] == "ini" {
+		if (len(args) == 2) {
+			decryptIni(args[1]);
+		} else {
+			decryptIni(defaultWinSCPIniFilePath());
+		}
+	} else {
+		fmt.Println(decrypt(args[0], args[1], args[2]))
+	}
+}
+
+func defaultWinSCPIniFilePath() string {
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal( err )
+	}
+	return usr.HomeDir + "\\AppData\\Roaming\\winSCP.ini"
+}
+
+func decryptIni(filepath string) {
+	cfg, err := ini.InsensitiveLoad(filepath)
+	if (err != nil) {
+		panic(err);
+	}
+
+	for _, c := range cfg.Sections() {
+		if c.HasKey("Password") {
+			fmt.Printf("%s\n", strings.TrimPrefix(c.Name(), "sessions\\"));
+			fmt.Printf("  Hostname: %s\n", c.Key("HostName").Value())
+			fmt.Printf("  Username: %s\n", c.Key("UserName").Value())
+			fmt.Printf("  Password: %s\n", decrypt(c.Key("HostName").Value(), c.Key("UserName").Value(), c.Key("Password").Value()));
+			fmt.Println("========================")
+		}
+	}
+
 }
 
 func decrypt(host, username, password string) string {
