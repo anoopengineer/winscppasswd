@@ -18,7 +18,7 @@ const (
 
 func main() {
 	args := os.Args[1:]
-	if len(args) != 3 || len(args) != 2 {
+	if len(args) != 3 && len(args) != 2 {
 		fmt.Println("WinSCP stored password finder\n")
 		fmt.Println("Registry:")
 		fmt.Println("  Open regedit and navigate to [HKEY_CURRENT_USER\\Software\\Martin Prikryl\\WinSCP 2\\Sessions] to get the hostname, username and encrypted password\n")
